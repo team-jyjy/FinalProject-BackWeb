@@ -40,14 +40,15 @@ def Token_conf(request, format=None):
     }
     return Response(content)
 
-# from django.contrib.auth import get_user_model
-# from django.core import serializers
-# @api_view(['GET',])
-# def What(request):
-#     # p = serializers.serialize('json', Profile.objects.all())
-#     user = User.objects.get(pk=request.user)
-#     user.Profile
-#     content = {
-#         'user': str(p)
-#     }
-#     return Response(content)
+from django.contrib.auth import get_user_model
+from django.core import serializers
+@api_view(['GET',])
+def Info(request):
+    user = User.objects.get(pk=request.user.pk)
+    content = {
+        'height': user.users.height,
+        'weight': user.users.weight,
+        'age': user.users.age,
+        'sex':user.users.sex
+    }
+    return Response(content)
