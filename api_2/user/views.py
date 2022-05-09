@@ -1,4 +1,4 @@
-from cProfile import Profile
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -11,6 +11,10 @@ from . import models
 
 class SignupView(APIView):
     def post(self, request):
+        # DB검사
+        if User.objects.filter(username=request.data['id']).exists():
+            return Response({"message": "fail"}, status = status.HTTP_403_FORBIDDEN)
+        
         user = User.objects.create_user(username=request.data['id'], password=request.data['password'])
         profile = models.Profile(user=user, height=request.data['height'],
         weight=request.data['weight'],
@@ -21,18 +25,19 @@ class SignupView(APIView):
         user.save()
         profile.save()
 
-        token = Token.objects.create(user=user)
-        return Response({"Token": token.key})
+        #token = Token.objects.create(user=user)
+        return Response({"message": "success"})
     
 class LoginView(APIView):
     def post(self, request):
         user = authenticate(username=request.data['id'], password=request.data['password'])
+
         if user is not None:
-            token = Token.objects.get(user=user)
+            token, created = Token.objects.get_or_create(user=user)
             return Response({"Token": token.key})
         else:
-            return Response(status=401)
-        
+            return Response({"message": "fail"}, status = status.HTTP_403_FORBIDDEN)
+            
 @api_view(['GET',])
 def Token_conf(request, format=None):
     content = {
