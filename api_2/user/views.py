@@ -15,7 +15,8 @@ class SignupView(APIView):
         profile = models.Profile(user=user, height=request.data['height'],
         weight=request.data['weight'],
         age=request.data['age'],
-        sex=request.data['sex'])
+        sex=request.data['sex'],
+        PA=request.data['PA'])
 
         user.save()
         profile.save()
@@ -40,15 +41,26 @@ def Token_conf(request, format=None):
     }
     return Response(content)
 
-from django.contrib.auth import get_user_model
-from django.core import serializers
+# 신체 활동 지수
+# 성인여자 = 354 - 6.91 x 연령(세) + PA[9.36x체중(kg)+726x신장(m)]
+# PA(신체활동계수): 1.0(비활동적), 1.12(저활동적), 1.27(활동적), 1.45(매우 활동적)
+
+# 성인남자 = 662-9.53x연령(세) + PA[15.91 x 체중(kg) + 539.6 x 신장(m)]
+# PA(신체활동계수) : 1.0(비활동적), 1.11(저활동적), 1.25(활동적), 1.48(매우 활동적)
+
 @api_view(['GET',])
 def Info(request):
     user = User.objects.get(pk=request.user.pk)
+    PA_value_M = [1.0, 1.11, 1.25, 1.48]
+    PA_value_W = [1.0, 1.12, 1.27, 1.45]
+    if(user.users.sex == 1):
+        goal_cal = 662 - 9.53 * user.users.age ## 하는중
+    
     content = {
         'height': user.users.height,
         'weight': user.users.weight,
         'age': user.users.age,
-        'sex':user.users.sex
+        'sex':user.users.sex,
+        'PA':user.users.PA
     }
     return Response(content)
