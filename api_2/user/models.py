@@ -14,4 +14,3 @@ class Profile(models.Model):
     sex = models.IntegerField(blank=False)
     PA = models.IntegerField(blank=False)
     
-    

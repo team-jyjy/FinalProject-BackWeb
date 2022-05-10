@@ -64,11 +64,16 @@ def Info(request):
     else: # 남자 권장 칼로리 (호호혹시나 성별 표시 안하면 남자로 계산됨)
         goal_cal = round(662 - 9.53 * user.users.age + PA_value_M[user.users.PA] * (15.91 * user.users.weight + 539.6 * user.users.height * 0.01))
     
+    if user.users.sex == 1:
+        sex = '여자'
+    else:
+        sex = '남자'
+        
     content = {
         'height': user.users.height,
         'weight': user.users.weight,
         'age': user.users.age,
-        'sex':user.users.sex,
+        'sex': sex,
         'goal_cal': goal_cal
     }
     return Response(content)
