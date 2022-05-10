@@ -16,11 +16,15 @@ class SignupView(APIView):
             return Response({"message": "fail"}, status = status.HTTP_403_FORBIDDEN)
         
         user = User.objects.create_user(username=request.data['id'], password=request.data['password'])
-        profile = models.Profile(user=user, height=request.data['height'],
-        weight=request.data['weight'],
-        age=request.data['age'],
-        sex=request.data['sex'],
-        PA=request.data['PA'])
+        profile = models.Profile(
+            user=user, 
+            nickname=request.data['nickname'], 
+            height=request.data['height'],
+            weight=request.data['weight'],
+            age=request.data['age'],
+            sex=request.data['sex'],
+            pa=request.data['pa']
+        )
 
         user.save()
         profile.save()
@@ -60,9 +64,9 @@ def Info(request):
     PA_value_W = [1.0, 1.12, 1.27, 1.45]
     
     if(user.users.sex == 1): # 여자 권장 칼로리
-        goal_cal = round(354 - 6.91 * user.users.age + PA_value_W[user.users.PA] * (9.36 * user.users.weight + 726 * user.users.height * 0.01))
+        goal_cal = round(354 - 6.91 * user.users.age + PA_value_W[user.users.pa] * (9.36 * user.users.weight + 726 * user.users.height * 0.01))
     else: # 남자 권장 칼로리 (호호혹시나 성별 표시 안하면 남자로 계산됨)
-        goal_cal = round(662 - 9.53 * user.users.age + PA_value_M[user.users.PA] * (15.91 * user.users.weight + 539.6 * user.users.height * 0.01))
+        goal_cal = round(662 - 9.53 * user.users.age + PA_value_M[user.users.pa] * (15.91 * user.users.weight + 539.6 * user.users.height * 0.01))
     
     if user.users.sex == 1:
         sex = '여자'
@@ -70,6 +74,7 @@ def Info(request):
         sex = '남자'
         
     content = {
+        'nickname': user.users.nickname,
         'height': user.users.height,
         'weight': user.users.weight,
         'age': user.users.age,
