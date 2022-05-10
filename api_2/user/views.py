@@ -34,7 +34,7 @@ class LoginView(APIView):
 
         if user is not None:
             token, created = Token.objects.get_or_create(user=user)
-            return Response({"Token": token.key})
+            return Response({"token": token.key})
         else:
             return Response({"message": "fail"}, status = status.HTTP_403_FORBIDDEN)
             
@@ -59,7 +59,7 @@ def Info(request):
     PA_value_M = [1.0, 1.11, 1.25, 1.48]
     PA_value_W = [1.0, 1.12, 1.27, 1.45]
     if(user.users.sex == 1):
-        goal_cal = 662 - 9.53 * user.users.age ## 하는중
+        goal_cal = 662 - 9.53 * user.users.age ## ㅎㅏ는중
     
     content = {
         'height': user.users.height,
