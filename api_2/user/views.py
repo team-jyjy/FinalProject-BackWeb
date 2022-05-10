@@ -58,14 +58,17 @@ def Info(request):
     user = User.objects.get(pk=request.user.pk)
     PA_value_M = [1.0, 1.11, 1.25, 1.48]
     PA_value_W = [1.0, 1.12, 1.27, 1.45]
-    if(user.users.sex == 1):
-        goal_cal = 662 - 9.53 * user.users.age ## ㅎㅏ는중
+    
+    if(user.users.sex == 1): # 여자 권장 칼로리
+        goal_cal = round(354 - 6.91 * user.users.age + PA_value_W[user.users.PA] * (9.36 * user.users.weight + 726 * user.users.height * 0.01))
+    else: # 남자 권장 칼로리 (호호혹시나 성별 표시 안하면 남자로 계산됨)
+        goal_cal = round(662 - 9.53 * user.users.age + PA_value_M[user.users.PA] * (15.91 * user.users.weight + 539.6 * user.users.height * 0.01))
     
     content = {
         'height': user.users.height,
         'weight': user.users.weight,
         'age': user.users.age,
         'sex':user.users.sex,
-        'PA':user.users.PA
+        'goal_cal': goal_cal
     }
     return Response(content)
