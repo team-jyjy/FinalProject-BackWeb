@@ -5,6 +5,4 @@ from user.views import Token_conf, Info
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("user.urls")),
-    path('api/token/', Token_conf, name='Token_conf'),
-    path('Info/',Info)
 ]
