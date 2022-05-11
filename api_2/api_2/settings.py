@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     
     # Add
     'user',
+    'foods',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
