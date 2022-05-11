@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view
 from user import serializers
 from . import models
 
+
 class SignupView(APIView):
     def post(self, request):
         # DB검사
@@ -41,6 +42,7 @@ class LoginView(APIView):
             return Response({"token": token.key})
         else:
             return Response({"message": "fail"}, status = status.HTTP_403_FORBIDDEN)
+        
             
 @api_view(['GET',])
 def Token_conf(request, format=None):
@@ -57,7 +59,7 @@ def Token_conf(request, format=None):
 # 성인남자 = 662-9.53x연령(세) + PA[15.91 x 체중(kg) + 539.6 x 신장(m)]
 # PA(신체활동계수) : 1.0(비활동적), 1.11(저활동적), 1.25(활동적), 1.48(매우 활동적)
 
-@api_view(['GET',])
+@api_view(['GET']) # auth header를 넣어줘야함.
 def Info(request):
     user = User.objects.get(pk=request.user.pk)
     PA_value_M = [1.0, 1.11, 1.25, 1.48]
@@ -82,3 +84,6 @@ def Info(request):
         'goal_cal': goal_cal
     }
     return Response(content)
+
+
+
