@@ -1,12 +1,14 @@
-from django.shortcuts import render
 from rest_framework.response import Response
 from .models import food_info
 from rest_framework.decorators import api_view
+from rest_framework import status
 
 
 @api_view(['POST'])
 def get_food_info(request): # 음식 올렸을 때 상세 정보 받아오기
-
+    if not food_info.objects.filter(food_name=request.data['food_name']).exists():
+        return Response({'message':'fail'}, status = status.HTTP_403_FORBIDDEN)
+    
     info = food_info.objects.get(food_name=request.data['food_name'])
     content = {
         'food_cal': info.food_cal,
@@ -20,3 +22,4 @@ def get_food_info(request): # 음식 올렸을 때 상세 정보 받아오기
         'food_trans_fat': info.food_trans_fat,
     }
     return Response(content)
+
