@@ -1,6 +1,8 @@
 from django.urls import path, include
 from . import views
 
+app_name = 'user'
+
 urlpatterns = [
     path('signup/', views.SignupView.as_view()), # 클래스뷰라서 as_view()사용
     path('login/', views.LoginView.as_view()),

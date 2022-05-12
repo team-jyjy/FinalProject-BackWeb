@@ -1,8 +1,8 @@
 from django.urls import path, include
 from django.contrib import admin
-from user.views import Token_conf, Info
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("user.urls")),
+    path("food/", include("foods.urls")),
 ]
