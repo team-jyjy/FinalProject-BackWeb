@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate
 from rest_framework.decorators import api_view
 from user import serializers
 from . import models
+from user.models import Profile
 
 
 class SignupView(APIView):
