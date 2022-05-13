@@ -167,3 +167,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# session 유지 시간
+DAY_IN_SECONDS = 86400 # 세션 유지 시간을 하루로 설정 (초)
+SESSION_COOKIE_AGE = DAY_IN_SECONDS
