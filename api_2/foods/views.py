@@ -72,19 +72,20 @@ def calendar_view(request): # 캘린더 확인 (성공여부 계산)
     
     
     # 날짜와 Id로 user_food 테이블에서 조회함
-    cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1]) # 날짜에 있는 데이터 개수에 따라 [0][1][2] 값으로 불러올 수 있음 (day는 date__day=date_day[2])
+    # cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1]) # 날짜에 있는 데이터 개수에 따라 [0][1][2] 값으로 불러올 수 있음 (day는 date__day=date_day[2])
     
-    for i_date in range(1, 31):
-        counts = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=i_date).count() # 하룻동안 식단 개수
-        for i_day in range(counts):
-            cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=i_date) # 날짜에 있는 데이터 개수에 따라 [0][1][2] 값으로 불러올 수 있음(있을때만)
+    # for i_date in range(1, 31):
+    #     counts = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=i_date).count() # 하룻동안 식단 개수
+    #     for i_day in range(counts):
+    #         cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=i_date) # 날짜에 있는 데이터 개수에 따라 [0][1][2] 값으로 불러올 수 있음(있을때만)
 
-            today_cal += cal[i_day].food_cal # 오늘 먹은 음식 칼로리 더하기
+    #         today_cal += cal[i_day].food_cal # 오늘 먹은 음식 칼로리 더하기
             
-            if(counts == 3 and today_cal < goal_cal):
-                food_success_day[i_date - 1] = 1
+    #         if(counts == 3 and today_cal < goal_cal):
+    #             food_success_day[i_date - 1] = 1
 
-        today_cal = 0
+    #     today_cal = 0
+    food_success_day = success_day_count(request.data['id'], request.data['datetime'], goal_cal)
         
     content = [
         {"date":1, "success":food_success_day[0]},
@@ -121,5 +122,31 @@ def calendar_view(request): # 캘린더 확인 (성공여부 계산)
     return Response(content)
 
 
+def success_day_count(id, datetime, goal_cal): # 성공 일수 세기, 받을거 : 오늘 날짜, userID, 목표칼로리
+    date_day = datetime.split('-')
+    find_userid = User.objects.get(username=id)
     
+    # 성공 여부 월단위
+    food_success_day = [0] * 30
+    # 일별 먹은 칼로리
+    today_cal = 0
+    
+    # 날짜와 Id로 user_food 테이블에서 조회함
+    cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1]) # 날짜에 있는 데이터 개수에 따라 [0][1][2] 값으로 불러올 수 있음 (day는 date__day=date_day[2])
+    
+    for i_date in range(1, 31):
+        counts = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=i_date).count() # 하룻동안 식단 개수
+        for i_day in range(counts):
+            cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=i_date) # 날짜에 있는 데이터 개수에 따라 [0][1][2] 값으로 불러올 수 있음(있을때만)
+
+            today_cal += cal[i_day].food_cal # 오늘 먹은 음식 칼로리 더하기
+            
+            if(counts == 3 and today_cal < goal_cal):
+                food_success_day[i_date - 1] = 1
+
+        today_cal = 0
+        
+    return food_success_day
+        
+
 

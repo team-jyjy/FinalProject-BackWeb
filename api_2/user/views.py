@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate
 from rest_framework.decorators import api_view
 from user import serializers
 from . import models
-from user.models import Profile
+from foods.views import success_day_count
 
 
 class SignupView(APIView):
@@ -59,9 +59,9 @@ def Token_conf(request, format=None):
 # 성인남자 = 662-9.53x연령(세) + PA[15.91 x 체중(kg) + 539.6 x 신장(m)]
 # PA(신체활동계수) : 1.0(비활동적), 1.11(저활동적), 1.25(활동적), 1.48(매우 활동적)
 
-@api_view(['GET']) # auth header를 넣어줘야함.
+@api_view(['POST']) # auth header를 넣어줘야함.
 def Info(request):
-    user = User.objects.get(pk=request.user.pk)
+    user = User.objects.get(username=request.data['id'])
     PA_value_M = [1.0, 1.11, 1.25, 1.48]
     PA_value_W = [1.0, 1.12, 1.27, 1.45]
     
@@ -74,16 +74,19 @@ def Info(request):
         sex = '여자'
     else:
         sex = '남자'
-        
+    
+    food_success_day = success_day_count(request.data['id'], request.data['datetime'], goal_cal)
+    success_day = sum(food_success_day)
+    
     content = {
         'nickname': user.users.nickname,
         'height': user.users.height,
         'weight': user.users.weight,
         'age': user.users.age,
         'sex': sex,
-        'goal_cal': goal_cal
+        'goal_cal': goal_cal,
+        'success_day': success_day
     }
     return Response(content)
-
-
+    
 
