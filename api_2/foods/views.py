@@ -6,6 +6,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 
 
+
 @api_view(['POST'])
 def get_food_info(request): # 음식 올렸을 때 상세 정보 받아오기
     if not food_info.objects.filter(food_name=request.data['food_name']).exists():
@@ -60,31 +61,9 @@ def calendar_view(request): # 캘린더 확인 (성공여부 계산)
     # 일별 먹은 칼로리
     today_cal = 0
     
-    # user의 권장 칼로리
-    user = User.objects.get(username=request.data['id'])
-    PA_value_M = [1.0, 1.11, 1.25, 1.48]
-    PA_value_W = [1.0, 1.12, 1.27, 1.45]
+    # 권장 칼로리
+    goal_cal = Goal_cal(request.data['id'])
     
-    if(user.users.sex == 1): # 여자 권장 칼로리
-        goal_cal = round(354 - 6.91 * user.users.age + PA_value_W[user.users.pa] * (9.36 * user.users.weight + 726 * user.users.height * 0.01))
-    else: # 남자 권장 칼로리 (호호혹시나 성별 표시 안하면 남자로 계산됨)
-        goal_cal = round(662 - 9.53 * user.users.age + PA_value_M[user.users.pa] * (15.91 * user.users.weight + 539.6 * user.users.height * 0.01))
-    
-    
-    # 날짜와 Id로 user_food 테이블에서 조회함
-    # cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1]) # 날짜에 있는 데이터 개수에 따라 [0][1][2] 값으로 불러올 수 있음 (day는 date__day=date_day[2])
-    
-    # for i_date in range(1, 31):
-    #     counts = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=i_date).count() # 하룻동안 식단 개수
-    #     for i_day in range(counts):
-    #         cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=i_date) # 날짜에 있는 데이터 개수에 따라 [0][1][2] 값으로 불러올 수 있음(있을때만)
-
-    #         today_cal += cal[i_day].food_cal # 오늘 먹은 음식 칼로리 더하기
-            
-    #         if(counts == 3 and today_cal < goal_cal):
-    #             food_success_day[i_date - 1] = 1
-
-    #     today_cal = 0
     food_success_day = success_day_count(request.data['id'], request.data['datetime'], goal_cal)
         
     content = [
@@ -132,8 +111,6 @@ def success_day_count(id, datetime, goal_cal): # 성공 일수 세기 (성공 �
     today_cal = 0
     
     # 날짜와 Id로 user_food 테이블에서 조회함
-    # cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1]) # 날짜에 있는 데이터 개수에 따라 [0][1][2] 값으로 불러올 수 있음 (day는 date__day=date_day[2])
-    
     for i_date in range(1, 31):
         counts = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=i_date).count() # 하룻동안 식단 개수
         for i_day in range(counts):
@@ -165,17 +142,7 @@ def calendar_day_info(request):
     # 총 칼로리
     total_cal = 0
     # 목표 칼로리
-    PA_value_M = [1.0, 1.11, 1.25, 1.48]
-    PA_value_W = [1.0, 1.12, 1.27, 1.45]
-    
-    if(find_userid.users.sex == 1): # 여자 권장 칼로리
-        goal_cal = round(354 - 6.91 * find_userid.users.age + PA_value_W[find_userid.users.pa] * (9.36 * find_userid.users.weight + 726 * find_userid.users.height * 0.01))
-    else: # 남자 권장 칼로리 (호호혹시나 성별 표시 안하면 남자로 계산됨)
-        goal_cal = round(662 - 9.53 * find_userid.users.age + PA_value_M[find_userid.users.pa] * (15.91 * find_userid.users.weight + 539.6 * find_userid.users.height * 0.01))
-    
-    
-    # 어케 해야하냐면 보내야하는게 탄단지 비율 아점저 -> 이게 아이디랑 날짜 매칭해서 User_food 테이블에서 가져오는거고..
-    # 탄단지 비율은 [0][1][2] 더하는거고? [0]일 때 칼로리,[1]일 때 칼로리, [2]일 때 칼로리 가져오는거니끼
+    goal_cal = Goal_cal(request.data['id'])
     
     # 하루 식단 id와 datetime으로 가져오기
     cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=date_day[2])
@@ -212,3 +179,24 @@ def calendar_day_info(request):
     }
     
     return Response(content)
+
+
+def Goal_cal(id):
+    # 신체 활동 지수
+    # 성인여자 = 354 - 6.91 x 연령(세) + PA[9.36x체중(kg)+726x신장(m)]
+    # PA(신체활동계수): 1.0(비활동적), 1.12(저활동적), 1.27(활동적), 1.45(매우 활동적)
+
+    # 성인남자 = 662-9.53x연령(세) + PA[15.91 x 체중(kg) + 539.6 x 신장(m)]
+    # PA(신체활동계수) : 1.0(비활동적), 1.11(저활동적), 1.25(활동적), 1.48(매우 활동적)
+    
+    # user의 권장 칼로리
+    user = User.objects.get(username=id)
+    PA_value_M = [1.0, 1.11, 1.25, 1.48]
+    PA_value_W = [1.0, 1.12, 1.27, 1.45]
+    
+    if(user.users.sex == 1): # 여자 권장 칼로리
+        goal_cal = round(354 - 6.91 * user.users.age + PA_value_W[user.users.pa] * (9.36 * user.users.weight + 726 * user.users.height * 0.01))
+    else: # 남자 권장 칼로리 (호호혹시나 성별 표시 안하면 남자로 계산됨)
+        goal_cal = round(662 - 9.53 * user.users.age + PA_value_M[user.users.pa] * (15.91 * user.users.weight + 539.6 * user.users.height * 0.01))
+
+    return goal_cal
