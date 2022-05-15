@@ -20,7 +20,7 @@ def get_food_info(request): # 음식 올렸을 때 상세 정보 받아오기
         'food_sugar': info.food_sugar,
         'food_chole': info.food_chole,
         'food_na': info.food_na,
-        'food_satarated_fat': info.food_saturated_fat,
+        'food_saturated_fat': info.food_saturated_fat,
         'food_trans_fat': info.food_trans_fat,
     }
     return Response(content)
