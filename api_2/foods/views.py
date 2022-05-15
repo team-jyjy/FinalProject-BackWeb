@@ -188,11 +188,22 @@ def calendar_day_info(request):
         total_fat += cal[i_day].food_fat
         
         total_cal += cal[i_day].food_cal
+    
+    totalNutrients = 0
+    totalNutrients = total_carbo + total_protein + total_fat
+    if totalNutrients == 0:
+        totalNutrients = 1 # 1로 해놔야 에러 안뜸
+        
+    # 소숫점 둘째까지 탄단지 비율
+    ratio_carbo = '%.2f%%'%(total_carbo/totalNutrients * 100.0)
+    ratio_protein = '%.2f%%'%(total_protein/totalNutrients * 100.0)
+    ratio_fat = '%.2f%%'%(total_fat/totalNutrients * 100.0)
+
         
     content = {
-        'total_carbo' : total_carbo,
-        'total_protein' : total_protein,
-        'total_fat' : total_fat,
+        'ratio_carbo' : ratio_carbo,
+        'ratio_protein' : ratio_protein,
+        'ratio_fat' : ratio_fat,
         'breakfast_cal' : today_cal[0],
         'lunch_cal' : today_cal[1],
         'dinner_cal' : today_cal[2],
