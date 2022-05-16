@@ -30,14 +30,14 @@ def get_food_info(request): # 음식 올렸을 때 상세 정보 받아오기
 @api_view(['POST'])
 @require_POST
 def update_user_food(request): # 먹은거 저장
-    if not User.objects.filter(username=request.data['id']).exists(): # userID 존재하지 않음
+    if not User.objects.filter(username=request.user).exists(): # userID 존재하지 않음
         return Response({"message": "fail"}, status = status.HTTP_403_FORBIDDEN)
     
     
     info = food_info.objects.get(food_name=request.data['food_name'])
 
     user_foods = user_food(
-        user=User.objects.get(username = request.data['id']), 
+        user=User.objects.get(username = request.user), 
         food_info=food_info.objects.get(food_name = request.data['food_name']), 
         food_type=request.data['food_type'], 
         food_cal=info.food_cal,
@@ -56,9 +56,9 @@ def calendar_view(request): # 캘린더 확인 (성공여부 계산)
     food_success_day = [0] * 30 # 성공 여부 월단위
     
     # 권장 칼로리
-    goal_cal = Goal_cal(request.data['id'])
+    goal_cal = Goal_cal(request.user)
     
-    food_success_day = success_day_count(request.data['id'], request.data['datetime'], goal_cal)
+    food_success_day = success_day_count(request.user, request.data['datetime'], goal_cal)
         
     content = [
         {"date":1, "success":food_success_day[0]},
@@ -124,9 +124,8 @@ def success_day_count(id, datetime, goal_cal): # 성공 일수 세기 (성공 �
 @api_view(['POST'])
 def calendar_day_info(request):
     date_day = request.data['datetime'].split('-') # 연도-월-일 까지 받음
-    find_userid = User.objects.get(username=request.data['id']) # id 받음
+    find_userid = User.objects.get(username=request.user) # 토큰으로 id 받음
     
-    # 변수 넣어놓음
     # 아점저 칼로리
     today_cal = [0] * 3
     # 탄단지 총합
@@ -136,7 +135,7 @@ def calendar_day_info(request):
     # 총 칼로리
     total_cal = 0
     # 목표 칼로리
-    goal_cal = Goal_cal(request.data['id'])
+    goal_cal = Goal_cal(request.user)
     
     # 하루 식단 id와 datetime으로 가져오기
     cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=date_day[2])

@@ -53,14 +53,15 @@ def Token_conf(request, format=None):
 
 @api_view(['POST']) # auth header를 넣어줘야함.
 def Info(request):
-    user = User.objects.get(username=request.data['id'])
-    goal_cal = Goal_cal(request.data['id'])
+    user = User.objects.get(username=request.user) # 토큰으로 ID 검색
+    goal_cal = Goal_cal(request.user)
+    
     if user.users.sex == 1:
         sex = '여자'
     else:
         sex = '남자'
     
-    food_success_day = success_day_count(request.data['id'], request.data['datetime'], goal_cal)
+    food_success_day = success_day_count(request.user, request.data['datetime'], goal_cal)
     success_day = sum(food_success_day)
     
     content = {
