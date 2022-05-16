@@ -53,13 +53,7 @@ def update_user_food(request): # 먹은거 저장
     
 @api_view(['POST'])
 def calendar_view(request): # 캘린더 확인 (성공여부 계산)
-    # date_day = request.data['datetime'].split('-')
-    # find_userid = User.objects.get(username=request.data['id'])
-    
     food_success_day = [0] * 30 # 성공 여부 월단위
-    
-    # 일별 먹은 칼로리
-    today_cal = 0
     
     # 권장 칼로리
     goal_cal = Goal_cal(request.data['id'])
@@ -118,7 +112,7 @@ def success_day_count(id, datetime, goal_cal): # 성공 일수 세기 (성공 �
 
             today_cal += cal[i_day].food_cal # 오늘 먹은 음식 칼로리 더하기
             
-            if(counts == 3 and today_cal < goal_cal):
+            if(counts == 3 and today_cal >= goal_cal - 500 and today_cal <= goal_cal + 500):
                 food_success_day[i_date - 1] = 1
 
         today_cal = 0
@@ -168,6 +162,7 @@ def calendar_day_info(request):
 
         
     content = {
+        'nickname' : find_userid.users.nickname,
         'ratio_carbo' : ratio_carbo,
         'ratio_protein' : ratio_protein,
         'ratio_fat' : ratio_fat,
@@ -189,7 +184,7 @@ def Goal_cal(id):
     # 성인남자 = 662-9.53x연령(세) + PA[15.91 x 체중(kg) + 539.6 x 신장(m)]
     # PA(신체활동계수) : 1.0(비활동적), 1.11(저활동적), 1.25(활동적), 1.48(매우 활동적)
     
-    # user의 권장 칼로리
+    # 권장 칼로리
     user = User.objects.get(username=id)
     PA_value_M = [1.0, 1.11, 1.25, 1.48]
     PA_value_W = [1.0, 1.12, 1.27, 1.45]

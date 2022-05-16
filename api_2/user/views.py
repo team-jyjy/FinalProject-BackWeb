@@ -30,7 +30,6 @@ class SignupView(APIView):
         user.save()
         profile.save()
 
-        #token = Token.objects.create(user=user)
         return Response({"message": "success"})
     
 class LoginView(APIView):
