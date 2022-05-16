@@ -70,7 +70,8 @@ def Info(request):
         'age': user.users.age,
         'sex': sex,
         'goal_cal': goal_cal,
-        'success_day': success_day
+        'success_day': success_day,
+        'ir':1.5
     }
     return Response(content)
     
