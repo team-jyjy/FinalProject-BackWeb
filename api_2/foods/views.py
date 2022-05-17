@@ -120,59 +120,61 @@ def success_day_count(id, datetime, goal_cal): # 성공 일수 세기 (성공 �
     return food_success_day
         
         
-# 해당 날짜의 탄단지 비율, 아점저 칼로리, 목표 칼로리, 총 칼로리
-@api_view(['POST'])
-def calendar_day_info(request):
-    date_day = request.data['datetime'].split('-') # 연도-월-일 까지 받음
-    find_userid = User.objects.get(username=request.user) # 토큰으로 id 받음
+# # 해당 날짜의 탄단지 비율, 아점저 칼로리, 목표 칼로리, 총 칼로리
+# @api_view(['POST'])
+# def calendar_day_info(request):
+#     date_day = request.data['datetime'].split('-') # 연도-월-일 까지 받음
+#     find_userid = User.objects.get(username=request.user) # 토큰으로 id 받음
     
-    # 아점저 칼로리
-    today_cal = [0] * 3
-    # 탄단지 총합
-    total_carbo = 0
-    total_protein = 0
-    total_fat = 0
-    # 총 칼로리
-    total_cal = 0
-    # 목표 칼로리
-    goal_cal = Goal_cal(request.user)
+#     # 아점저 칼로리
+#     today_cal = [0] * 3
+#     # 탄단지 총합
+#     total_carbo = 0
+#     total_protein = 0
+#     total_fat = 0
+#     # 총 칼로리
+#     total_cal = 0
+#     # 목표 칼로리
+#     goal_cal = Goal_cal(request.user)
     
-    # 하루 식단 id와 datetime으로 가져오기
-    cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=date_day[2])
+#     # 하루 식단 id와 datetime으로 가져오기
+#     cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=date_day[2])
     
-    for i_day in range(cal.count()):
-        today_cal[i_day] = cal[i_day].food_cal # 아점저 칼로리 리스트에 넣기
+#     for i_day in range(cal.count()):
+#         today_cal[i_day] = cal[i_day].food_cal # 아점저 칼로리 리스트에 넣기
         
-        total_carbo += cal[i_day].food_carbo
-        total_protein += cal[i_day].food_protein
-        total_fat += cal[i_day].food_fat
+#         total_carbo += cal[i_day].food_carbo
+#         total_protein += cal[i_day].food_protein
+#         total_fat += cal[i_day].food_fat
         
-        total_cal += cal[i_day].food_cal
+#         total_cal += cal[i_day].food_cal
     
-    totalNutrients = 0
-    totalNutrients = total_carbo + total_protein + total_fat
-    if totalNutrients == 0:
-        totalNutrients = 1 # 1로 해놔야 에러 안뜸
+#     totalNutrients = 0
+#     totalNutrients = total_carbo + total_protein + total_fat
+#     if totalNutrients == 0:
+#         totalNutrients = 1 # 1로 해놔야 에러 안뜸
         
-    # 소숫점 둘째까지 탄단지 비율
-    ratio_carbo = '%.2f%%'%(total_carbo/totalNutrients * 100.0)
-    ratio_protein = '%.2f%%'%(total_protein/totalNutrients * 100.0)
-    ratio_fat = '%.2f%%'%(total_fat/totalNutrients * 100.0)
+#     # 소숫점 둘째까지 탄단지 비율
+#     ratio_carbo = '%.2f%%'%(total_carbo/totalNutrients * 100.0)
+#     ratio_protein = '%.2f%%'%(total_protein/totalNutrients * 100.0)
+#     ratio_fat = '%.2f%%'%(total_fat/totalNutrients * 100.0)
 
         
-    content = {
-        'nickname' : find_userid.users.nickname,
-        'ratio_carbo' : ratio_carbo,
-        'ratio_protein' : ratio_protein,
-        'ratio_fat' : ratio_fat,
-        'breakfast_cal' : today_cal[0],
-        'lunch_cal' : today_cal[1],
-        'dinner_cal' : today_cal[2],
-        'total_cal' : total_cal,
-        'goal_cal' : goal_cal
-    }
+#     content = [{
+#         'nickname' : find_userid.users.nickname,
+#         'ratio_carbo' : ratio_carbo,
+#         'ratio_protein' : ratio_protein,
+#         'ratio_fat' : ratio_fat,
+#         'breakfast_cal' : today_cal[0],
+#         'lunch_cal' : today_cal[1],
+#         'dinner_cal' : today_cal[2],
+#         'total_cal' : total_cal,
+#         'goal_cal' : goal_cal
+#     }
+#     ]
     
-    return Response(content)
+    
+#     return Response(content)
 
 
 def Goal_cal(id):
@@ -194,3 +196,66 @@ def Goal_cal(id):
         goal_cal = round(662 - 9.53 * user.users.age + PA_value_M[user.users.pa] * (15.91 * user.users.weight + 539.6 * user.users.height * 0.01))
 
     return goal_cal
+
+
+
+###############################
+@api_view(['POST'])
+def calendar_day_info(request):
+    date_day = request.data['datetime'].split('-') # 연도-월 까지 받음
+    find_userid = User.objects.get(username=request.user) # 토큰으로 id 받음
+    
+    content = []
+    
+    for i in range(1, 31): # i = 일
+        # 아점저 칼로리
+        today_cal = [0] * 3
+        # 탄단지 총합
+        total_carbo = 0
+        total_protein = 0
+        total_fat = 0
+        # 총 칼로리
+        total_cal = 0
+        # 목표 칼로리
+        goal_cal = Goal_cal(request.user)
+        
+        # 하루 식단 id와 datetime으로 가져오기
+        cal = user_food.objects.filter(user_id=find_userid.id, date__year=date_day[0], date__month=date_day[1], date__day=i)
+        
+        for i_day in range(cal.count()):
+            today_cal[i_day] = cal[i_day].food_cal # 아점저 칼로리 리스트에 넣기
+            
+            total_carbo += cal[i_day].food_carbo
+            total_protein += cal[i_day].food_protein
+            total_fat += cal[i_day].food_fat
+            
+            total_cal += cal[i_day].food_cal
+        
+        totalNutrients = 0
+        totalNutrients = total_carbo + total_protein + total_fat
+        if totalNutrients == 0:
+            totalNutrients = 1 # 1로 해놔야 에러 안뜸
+            
+        # 소숫점 둘째까지 탄단지 비율
+        ratio_carbo = '%.2f%%'%(total_carbo/totalNutrients * 100.0)
+        ratio_protein = '%.2f%%'%(total_protein/totalNutrients * 100.0)
+        ratio_fat = '%.2f%%'%(total_fat/totalNutrients * 100.0)
+
+        success_day = sum(success_day_count(request.user, str(date_day[0]) + '-' + str(date_day[1]) + '-' + str(i), goal_cal))
+        add_content = {
+            'day' : i,
+            'success_day' : success_day,
+            'nickname' : find_userid.users.nickname,
+            'ratio_carbo' : ratio_carbo,
+            'ratio_protein' : ratio_protein,
+            'ratio_fat' : ratio_fat,
+            'breakfast_cal' : today_cal[0],
+            'lunch_cal' : today_cal[1],
+            'dinner_cal' : today_cal[2],
+            'total_cal' : total_cal,
+            'goal_cal' : goal_cal
+        }
+        content.append(add_content)
+    
+    
+    return Response(content)

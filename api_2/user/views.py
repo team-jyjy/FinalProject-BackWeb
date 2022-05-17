@@ -69,7 +69,6 @@ def Info(request):
     # 2022-1월부터 서비스가 시작되었다고 가정
     date_day = request.data['datetime'].split('-')
     date_day = list(map(int, date_day))
-    print('dddddd : ', type(date_day[0]))
     ir = 1.5 # 기본 금리
     success_total_count = 0
     for i_year in range(2022, date_day[0] + 1):
