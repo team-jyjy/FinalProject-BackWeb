@@ -155,9 +155,9 @@ def success_day_count(id, datetime, goal_cal): # 성공 일수 세기 (성공 �
 #         totalNutrients = 1 # 1로 해놔야 에러 안뜸
         
 #     # 소숫점 둘째까지 탄단지 비율
-#     ratio_carbo = '%.2f%%'%(total_carbo/totalNutrients * 100.0)
-#     ratio_protein = '%.2f%%'%(total_protein/totalNutrients * 100.0)
-#     ratio_fat = '%.2f%%'%(total_fat/totalNutrients * 100.0)
+#     ratio_carbo = '%.2f'%(total_carbo/totalNutrients * 100.0)
+#     ratio_protein = '%.2f'%(total_protein/totalNutrients * 100.0)
+#     ratio_fat = '%.2f'%(total_fat/totalNutrients * 100.0)
 
         
 #     content = [{
@@ -207,6 +207,7 @@ def calendar_day_info(request):
     
     content = []
     
+    # success_day = success_day_count(request.user, str(date_day[0]) + '-' + str(date_day[1]), Goal_cal(request.user))
     for i in range(1, 31): # i = 일
         # 아점저 칼로리
         today_cal = [0] * 3
@@ -237,14 +238,14 @@ def calendar_day_info(request):
             totalNutrients = 1 # 1로 해놔야 에러 안뜸
             
         # 소숫점 둘째까지 탄단지 비율
-        ratio_carbo = '%.2f%%'%(total_carbo/totalNutrients * 100.0)
-        ratio_protein = '%.2f%%'%(total_protein/totalNutrients * 100.0)
-        ratio_fat = '%.2f%%'%(total_fat/totalNutrients * 100.0)
+        ratio_carbo = '%.2f'%(total_carbo/totalNutrients * 100.0)
+        ratio_protein = '%.2f'%(total_protein/totalNutrients * 100.0)
+        ratio_fat = '%.2f'%(total_fat/totalNutrients * 100.0)
 
-        success_day = sum(success_day_count(request.user, str(date_day[0]) + '-' + str(date_day[1]) + '-' + str(i), goal_cal))
+        success_day = success_day_count(request.user, str(date_day[0]) + '-' + str(date_day[1]) + '-' + str(i), goal_cal)
         add_content = {
             'day' : i,
-            'success_day' : success_day,
+            'success_day' : success_day[i-1],
             'nickname' : find_userid.users.nickname,
             'ratio_carbo' : ratio_carbo,
             'ratio_protein' : ratio_protein,
@@ -256,6 +257,7 @@ def calendar_day_info(request):
             'goal_cal' : goal_cal
         }
         content.append(add_content)
+        success_day=0
     
     
     return Response(content)
