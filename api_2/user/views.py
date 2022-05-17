@@ -1,3 +1,4 @@
+from scipy.fft import irfft
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -64,6 +65,30 @@ def Info(request):
     food_success_day = success_day_count(request.user, request.data['datetime'], goal_cal)
     success_day = sum(food_success_day)
     
+    # ir
+    # 1개월~5개월까지 1.5%, 6개월~11개월 1.75%, 12개월~23개월까지 2.15%, 24~35 2.25%, 36개월~ 2.45%
+    # 2022-1월부터 서비스가 시작되었다고 가정
+    date_day = request.data['datetime'].split('-')
+    date_day = list(map(int, date_day))
+    print('dddddd : ', type(date_day[0]))
+    ir = 1.5 # 기본 금리
+    success_total_count = 0
+    for i_year in range(2022, date_day[0] + 1):
+        for i_month in range(1, 13):
+            if i_year == date_day[0] and i_month == date_day[1] + 1:
+                break
+            if sum(success_day_count(request.user, str(i_year)+'-'+str(i_month), goal_cal)) >= 20:
+                success_total_count += 1
+                
+    if success_total_count >= 6 and success_total_count < 12:
+        ir = 1.75
+    elif success_total_count >= 12 and success_total_count < 24:
+        ir = 2.15
+    elif success_total_count >= 24 and success_total_count < 36:
+        ir = 2.25
+    elif success_total_count >= 36:
+        ir = 2.45
+        
     content = {
         'nickname': user.users.nickname,
         'height': user.users.height,
@@ -72,7 +97,7 @@ def Info(request):
         'sex': sex,
         'goal_cal': goal_cal,
         'success_day': success_day,
-        'ir':1.5
+        'ir': ir
     }
     return Response(content)
     
